@@ -1,0 +1,12 @@
+{
+    "name": "docker",
+    "version": "1.0.0",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "format": "prettier --write ."
+    },
+    "devDependencies": {
+        "prettier": "^3.3.3"
+    }
+}

@@ -1,0 +1,25 @@
+global:
+    checkNewVersion: true
+    sendAnonymousUsage: false
+
+log:
+    level: debug
+
+api:
+    dashboard: true
+    insecure: true
+
+entryPoints:
+    web:
+        address: :80
+
+providers:
+    docker:
+        endpoint: 'unix:///var/run/docker.sock'
+        defaultRule: Host(`{{ normalize .Name }}.localhost`)
+        exposedByDefault: false
+        network: traefik
+
+    file:
+        directory: /etc/traefik/dynamic
+        watch: true

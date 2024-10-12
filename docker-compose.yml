@@ -1,0 +1,145 @@
+services:
+    traefik:
+        image: traefik:v3.1.4
+        container_name: traefik
+        restart: always
+        ports:
+            - '80:80'
+        volumes:
+            - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+            - ./traefik/dynamic/:/etc/traefik/dynamic
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)
+            - traefik.http.routers.traefik-dashboard.service=api@internal
+            - traefik.http.routers.traefik-dashboard.entrypoints=web
+
+    portainer:
+        image: portainer/portainer-ce:2.21.1
+        container_name: portainer
+        restart: always
+        command: --http-enabled
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - portainer_data:/data
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.portainer.rule=Host(`portainer.localhost`)
+            - traefik.http.routers.portainer.entrypoints=web
+            - traefik.http.services.portainer-service.loadbalancer.server.port=9000
+
+    mysql:
+        image: mysql:8
+        container_name: mysql
+        restart: always
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: null
+            MYSQL_DATABASE: phpmyadmin
+            MYSQL_USER: pma
+            MYSQL_PASSWORD: pmapass
+            MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+            - ./mysql/dump:/opt/mysql/dump
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+            retries: 3
+            timeout: 5s
+
+    redis:
+        image: redis:7.4-alpine
+        container_name: redis
+        restart: always
+        ports:
+            - 6379:6379
+        volumes:
+            - ./redis/data:/data
+        command: redis-server --loglevel warning
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+
+    mailpit:
+        image: axllent/mailpit:v1.20.4
+        container_name: mailpit
+        restart: always
+        ports:
+            - 1025:1025
+        environment:
+            MP_DATABASE: /data/mailpit.db
+            # MP_UI_AUTH_FILE: /data/authfile # .htaccess format
+            TZ: Asia/Karachi
+        volumes:
+            - ./mailpit/data:/data
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.mailpit.rule=Host(`mailpit.localhost`)
+            - traefik.http.routers.mailpit.entrypoints=web
+            - traefik.http.services.mailpit-service.loadbalancer.server.port=8025
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.1-apache
+        container_name: phpmyadmin
+        restart: always
+        ports:
+            - 8080:80
+        environment:
+            PMA_ABSOLUTE_URI: http://phpmyadmin.localhost
+            PMA_HOST: host.docker.internal
+            PMA_USER: root
+            PMA_PASSWORD: null
+            PMA_PMADB: phpmyadmin
+            PMA_CONTROLUSER: pma
+            PMA_CONTROLPASS: pmapass
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.localhost`)
+            - traefik.http.routers.phpmyadmin.entrypoints=web
+        depends_on:
+            - mysql
+
+    soketi:
+        image: quay.io/soketi/soketi:latest-16-alpine
+        container_name: soketi
+        restart: always
+        environment:
+            SOKETI_DEBUG: true
+            SOKETI_METRICS_SERVER_PORT: 9601
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.tcp.routers.soketi.entrypoints=web
+            - traefik.http.routers.soketi.rule=Host(`soketi.localhost`)
+            - traefik.http.routers.soketi.entrypoints=web
+            - traefik.http.routers.soketi.service=soketi-service
+            - traefik.http.services.soketi-service.loadbalancer.server.port=6001
+            - traefik.http.routers.soketi-metrics.rule=Host(`metrics.soketi.localhost`)
+            - traefik.http.routers.soketi-metrics.entrypoints=web
+            - traefik.http.routers.soketi-metrics.service=soketi-metrics-service
+            - traefik.http.services.soketi-metrics-service.loadbalancer.server.port=9601
+
+networks:
+    traefik:
+        external: true
+
+volumes:
+    portainer_data:
