@@ -18,13 +18,13 @@ services:
             - traefik.http.routers.traefik-dashboard.entrypoints=web
 
     portainer:
-        image: portainer/portainer-ce:2.21.1
+        image: portainer/portainer-ce:2.21.3
         container_name: portainer
         restart: always
         command: --http-enabled
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - portainer_data:/data
+            - ./portainer:/data
         networks:
             - traefik
         labels:
