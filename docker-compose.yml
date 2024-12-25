@@ -145,6 +145,25 @@ services:
             - traefik.http.routers.soketi-metrics.service=soketi-metrics-service
             - traefik.http.services.soketi-metrics-service.loadbalancer.server.port=9601
 
+    mongodb:
+        image: mongodb/mongodb-community-server:8.0.1-ubuntu2204
+        container_name: mongodb
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - mongodb:/data/db
+        networks:
+            - docker
+        healthcheck:
+            test:
+                - CMD
+                - mongosh
+                - 'mongodb://localhost:27017/admin'
+                - '--eval=db.runCommand({ping:1})'
+            retries: 3
+            timeout: 5s
+
 networks:
     docker:
         external: true
@@ -156,3 +175,4 @@ volumes:
     mailpit:
     redis:
     mysql:
+    mongodb:
