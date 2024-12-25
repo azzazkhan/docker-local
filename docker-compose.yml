@@ -11,6 +11,7 @@ services:
             - ./traefik/access.log:/var/log/traefik/access.log
             - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
+            - docker
             - traefik
         labels:
             - traefik.enable=true
@@ -48,6 +49,8 @@ services:
             MYSQL_ALLOW_EMPTY_PASSWORD: yes
         volumes:
             - mysql:/var/lib/mysql
+        networks:
+            - docker
         healthcheck:
             test:
                 - CMD
@@ -64,6 +67,8 @@ services:
             - 6379:6379
         volumes:
             - redis:/data
+        networks:
+            - docker
         command: redis-server --loglevel warning
         healthcheck:
             test:
@@ -86,6 +91,7 @@ services:
         volumes:
             - mailpit:/data
         networks:
+            - docker
             - traefik
         labels:
             - traefik.enable=true
@@ -125,6 +131,7 @@ services:
             SOKETI_DB_REDIS_HOST: redis
             SOKETI_DB_REDIS_KEY_PREFIX: soketi
         networks:
+            - docker
             - traefik
         labels:
             - traefik.enable=true
@@ -139,6 +146,8 @@ services:
             - traefik.http.services.soketi-metrics-service.loadbalancer.server.port=9601
 
 networks:
+    docker:
+        external: true
     traefik:
         external: true
 
