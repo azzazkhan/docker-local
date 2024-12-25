@@ -25,7 +25,7 @@ services:
         command: --http-enabled
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - ./portainer:/data
+            - portainer:/data
         networks:
             - traefik
         labels:
@@ -47,8 +47,7 @@ services:
             MYSQL_PASSWORD: pmapass
             MYSQL_ALLOW_EMPTY_PASSWORD: yes
         volumes:
-            - ./mysql/data:/var/lib/mysql
-            - ./mysql/dump:/opt/mysql/dump
+            - mysql:/var/lib/mysql
         healthcheck:
             test:
                 - CMD
@@ -64,7 +63,7 @@ services:
         ports:
             - 6379:6379
         volumes:
-            - ./redis/data:/data
+            - redis:/data
         command: redis-server --loglevel warning
         healthcheck:
             test:
@@ -85,7 +84,7 @@ services:
             # MP_UI_AUTH_FILE: /data/authfile # .htaccess format
             TZ: Asia/Karachi
         volumes:
-            - ./mailpit/data:/data
+            - mailpit:/data
         networks:
             - traefik
         labels:
@@ -144,4 +143,7 @@ networks:
         external: true
 
 volumes:
-    portainer_data:
+    portainer:
+    mailpit:
+    redis:
+    mysql:
