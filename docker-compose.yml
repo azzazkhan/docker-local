@@ -111,6 +111,7 @@ services:
             PMA_PMADB: phpmyadmin
             PMA_CONTROLUSER: pma
             PMA_CONTROLPASS: pmapass
+            UPLOAD_LIMIT: 128M
         networks:
             - traefik
         labels:
