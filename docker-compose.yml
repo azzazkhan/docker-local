@@ -59,6 +59,27 @@ services:
             retries: 3
             timeout: 5s
 
+    postgres:
+        image: postgres:17
+        container_name: postgres
+        shm_size: 128mb
+        restart: always
+        ports:
+            - 5432:5432
+        environment:
+            PGPASSWORD: password
+            POSTGRES_DB: docker
+            POSTGRES_USER: docker
+            POSTGRES_PASSWORD: password
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - docker
+        healthcheck:
+            test: ['CMD', 'pg_isready', '-q', '-d', 'docker', '-U', 'docker']
+            retries: 3
+            timeout: 5s
+
     redis:
         image: redis:7.4-alpine
         container_name: redis
@@ -177,3 +198,4 @@ volumes:
     redis:
     mysql:
     mongodb:
+    postgres:
