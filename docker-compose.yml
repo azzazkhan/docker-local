@@ -207,6 +207,20 @@ services:
             retries: 3
             timeout: 5s
 
+    xampp-proxy:
+        container_name: xampp-proxy
+        image: nginx:stable-alpine
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.xampp-proxy.rule=Host(`xampp.localhost`)
+            - traefik.http.routers.xampp-proxy.entrypoints=web
+            - traefik.http.services.xampp-proxy-service.loadbalancer.server.port=80
+
 networks:
     docker:
         external: true
