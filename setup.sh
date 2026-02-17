@@ -8,6 +8,7 @@ docker network ls | grep -q docker || docker network create docker
 
 if [[ ! -f traefik/access.log ]]; then
     touch traefik/access.log
+    touch traefik/traefik.log
 
-    echo "✅ Created Traefik system log file"
+    echo "✅ Created Traefik system and access log files"
 fi
