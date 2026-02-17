@@ -89,6 +89,7 @@ services:
             PGADMIN_DEFAULT_PASSWORD: password
         volumes:
             - pgadmin:/var/lib/pgadmin
+            - ./volumes/pgadmin-mount:/var/lib/pgadmin/storage/admin_pgadmin.org:rw
         networks:
             - traefik
         labels:
