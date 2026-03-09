@@ -60,23 +60,24 @@ services:
             timeout: 5s
 
     postgres:
-        image: postgres:17
+        image: postgres:18
         container_name: postgres
         shm_size: 128mb
         restart: always
         ports:
             - 5432:5432
         environment:
-            PGPASSWORD: password
-            POSTGRES_DB: pgadmin
-            POSTGRES_USER: admin
-            POSTGRES_PASSWORD: password
+            # PGPASSWORD: password
+            POSTGRES_DB: postgres
+            POSTGRES_USER: postgres
+            # POSTGRES_PASSWORD: password
+            POSTGRES_HOST_AUTH_METHOD: trust
         volumes:
-            - postgres:/var/lib/postgresql/data
+            - postgres:/var/lib/postgresql
         networks:
             - traefik
         healthcheck:
-            test: ['CMD', 'pg_isready', '-q', '-d', 'docker', '-U', 'docker']
+            test: ['CMD', 'pg_isready', '-q', '-d', 'postgres', '-U', 'postgres']
             retries: 3
             timeout: 5s
 
